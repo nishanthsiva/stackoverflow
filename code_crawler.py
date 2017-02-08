@@ -52,6 +52,13 @@ def storeQuestion(question, programming_lang, year):
 	createMetaFile(question, folder_path)	
 	writeQuestionBody(question, folder_path)
 	writeAnswers(question,folder_path+"/Answers/")
+	mfile_w= open(folder_path+"META_INFO_JSON.txt","w");
+	if 'answers' in question:
+		del question['answers']
+	if 'body' in question:
+		del question['body']
+	json.dump(question, mfile_w)
+	mfile_w.close()
 
 def processQuestions(questions,request_So_Far,programming_Lang, year):
 	for q in questions:
@@ -80,13 +87,16 @@ def fetchQuestions(from_Date, to_Date,programming_Lang):
 	while has_More and request_So_Far < request_Limit:
 		request_So_Far=request_So_Far+1
 		url="http://api.stackexchange.com/2.2/questions?key=sQVw3PIUoSA)Y5BJL2cWnw((&pagesize=100&fromdate=%d&todate=%d&order=desc&tagged=%s&sort=votes&site=stackoverflow&page=%d&filter=!-*7AsVmzB2CT" %(from_Date,to_Date,programming_Lang,page_number)
+		#url="http://api.stackexchange.com/2.2/questions?&key=e1bXudmCMCrJpb1aN0cIFg((&pagesize=100&order=desc&sort=votes&site=stackoverflow&fromdate=%d&todate=%d&page=%d&filter=!-*7AsVmzB2CT"%(from_Date,to_Date,page_number)
 		r=requests.get(url)
 		time.sleep(0.10)
 		response= r.json()
+		print "--Quota Remaining " + str(response['quota_remaining']);
 		questions= response['items']
 		has_More=response['has_more']
 		processQuestions(questions,request_So_Far,programming_Lang, 2015)
 		page_number += 1
+		break
 	print programming_Lang
 	print response['quota_remaining']
 	print request_So_Far
